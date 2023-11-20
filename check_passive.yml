@@ -1,0 +1,19 @@
+- name: Check Active
+  hosts: all
+  sources:
+    - name: Check controller
+      ansible.eda.url_check:
+        urls:
+          - https://192.168.122.105/api/v2/ping
+        delay: 2
+        verify_ssl: false
+  rules:
+    - name: Send event to controller
+      condition: event.url_check.status == "down"
+      action:
+        run_job_template:
+          name: Relocate scheduled jobs
+          organization: Default
+          job_args:
+            extra_vars:
+              host_down: "192.168.122.105"
